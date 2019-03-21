@@ -1,9 +1,6 @@
 package com.tian.txspring.webmvc.serlvet;
 
-import com.tian.txspring.webmvc.annotation.TXAutowired;
-import com.tian.txspring.webmvc.annotation.TXController;
-import com.tian.txspring.webmvc.annotation.TXRequestMapping;
-import com.tian.txspring.webmvc.annotation.TXService;
+import com.tian.txspring.webmvc.annotation.*;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.http.HttpServlet;
@@ -39,6 +36,10 @@ public class TXDispatcherServlet extends HttpServlet {
      * 方法与url映射关系
      */
     private Map<String, Method> handlerMapping = new HashMap<String, Method>();
+    /**
+     * 把ioc复制一份, 在解析切面的时候,用切面对象替换原有对象,以实现切面功能.
+     */
+    private Map<String, Object> iocProxy = new HashMap();
 
 
     public void doGet(HttpServletRequest req, HttpServletResponse resp){
@@ -113,11 +114,31 @@ public class TXDispatcherServlet extends HttpServlet {
         doScanner(contextConfig.getProperty("scan_package"));
         // 初始化所有相关的类,并且将所有扫到的类放到IOC容器中.
         doInstance();
+        // 切面功能初始化, 也就是针对切入点生成增强类
+        doAopInstance();
         // 自动注入
         doAutowired();
         // 初始化HandlerMapping
         initHandlerMapping();
 
+    }
+
+    /**
+     * 切面功能初始化
+     */
+    private void doAopInstance() {
+        // 先把前面生成的对象复制一份,查看有哪些方法是要增加的,生成增强类替换原对象
+        iocProxy.putAll(ioc);
+        for(String s: classNames){
+            try {
+                Class clazz = Class.forName(s);
+                if(clazz.isAnnotationPresent(TXAspect.class)){
+
+                }
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     /**
