@@ -14,4 +14,16 @@ public class StringUtils {
     public static boolean isBlank(String str){
         return !isNotBlank(str);
     }
+
+    /**
+     * 把首字母转小写工具类
+     * @param simpleName
+     * @return
+     */
+    public static String lowerFirstCase(String simpleName) {
+        char[] chars = simpleName.toCharArray();
+        // 英文的字母大小写,相差32
+        chars[0] += 32;
+        return new String(chars);
+    }
 }

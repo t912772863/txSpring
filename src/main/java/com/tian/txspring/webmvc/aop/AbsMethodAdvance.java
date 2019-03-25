@@ -1,6 +1,7 @@
 package com.tian.txspring.webmvc.aop;
 
 import com.tian.txspring.webmvc.util.StringUtils;
+import net.sf.cglib.beans.BeanMap;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -19,6 +20,16 @@ public abstract class AbsMethodAdvance implements MethodInterceptor {
      * 被代理的方法名
      */
     private String proxyMethodName;
+
+    private BeanMap beanMap;
+
+    public void setValue(String property,Object value) {
+        beanMap.put(property, value);
+    }
+
+    public Object getValue(String property) {
+        return beanMap.get(property);
+    }
 
     public Object createProxyObject(Object target){
         this.targetObject = target;

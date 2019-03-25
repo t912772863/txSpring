@@ -17,7 +17,6 @@ public class Main {
         //生成代理对象，默认为该类名的小写
         Demo001 test =(Demo001)proxyBeanMap.get("demo001");
         test.hello();
-        System.out.println("------------");
 
     }
 }

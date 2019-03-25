@@ -3,9 +3,7 @@ package com.tian.txspring.webmvc.util;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
-import java.net.JarURLConnection;
-import java.net.URL;
-import java.net.URLDecoder;
+import java.net.*;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Set;
@@ -51,12 +49,13 @@ public class ClassUtils {
 
     public static Set<Class<?>> getClassSet(String packageName) throws IOException {
         Set<Class<?>> classSet = new HashSet();
+        // 获取给定路径下所有的资源. 资源可以有多种表现形式,比如文件,文件夹等
         Enumeration<URL> urls = getClassLoader().getResources(packageName.replace(".", "/"));
         // Enumeration类似于一个迭代器
         while (urls.hasMoreElements()){
             URL url = urls.nextElement();
             if(url != null){
-                // 获得URL的协议
+                // 获得URL的协议,
                 String protocol = url.getProtocol();
                 if(protocol.equals("file")){
                     // 转码
@@ -101,6 +100,9 @@ public class ClassUtils {
                 return file.isFile() && file.getName().endsWith(".class") || file.isDirectory();
             }
         });
+        if(files == null){
+            return;
+        }
         for(File file: files){
             String fileName = file.getName();
             if(file.isFile()){
@@ -113,8 +115,8 @@ public class ClassUtils {
             }else {
                 // 子目录
                 String subPackagePath = fileName;
-                if(StringUtils.isNotBlank(packagePath)){
-                    subPackagePath = subPackagePath + "/" + subPackagePath;
+                if(StringUtils.isNotBlank(subPackagePath)){
+                    subPackagePath = packagePath + subPackagePath;
                 }
                 String subPackageName = fileName;
                 if(StringUtils.isNotBlank(packageName)){
@@ -126,5 +128,6 @@ public class ClassUtils {
         }
 
     }
+
 
 }
