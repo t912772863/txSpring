@@ -127,7 +127,7 @@ public class AopBeanContainer {
                         field.set(entry.getValue(), nameBean.get(beanName));
                     }else {
                         // 按类型注入
-                        field.set(entry.getValue(), typeBean.get(entry.getValue().getClass().getName()));
+                        field.set(entry.getValue(), typeBean.get(field.getType().getName()));
                     }
                 }catch (Exception e){
                     e.printStackTrace();

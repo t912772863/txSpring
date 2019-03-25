@@ -141,7 +141,7 @@ public class TXDispatcherServlet extends HttpServlet {
         beanContainer.doAutowired();
         // 切面功能初始化, 也就是针对切入点生成增强类
         aopBeanContainer.doAopInstance();
-        // 增加类的注入
+        // 增强类的注入
         aopBeanContainer.doAutowired();
         // 初始化HandlerMapping
         handlerMapping.initHandlerMapping();
