@@ -1,7 +1,6 @@
 package com.tian.txspring.webmvc.handler.mapping;
 
 import com.tian.txspring.webmvc.annotation.TXRequestMapping;
-import com.tian.txspring.webmvc.aop.AopBeanContainer;
 import com.tian.txspring.webmvc.ioc.BeanContainer;
 
 import java.lang.reflect.Method;
@@ -12,7 +11,6 @@ import java.util.Map;
  * Created by tianxiong on 2019/3/24.
  */
 public class HandlerMapping {
-    private AopBeanContainer aopBeanContainer;
     private BeanContainer beanContainer;
     /**
      * 方法与url映射关系
