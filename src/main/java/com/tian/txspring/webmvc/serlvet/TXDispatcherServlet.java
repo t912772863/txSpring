@@ -1,5 +1,7 @@
 package com.tian.txspring.webmvc.serlvet;
 
+import com.alibaba.fastjson.JSONObject;
+import com.tian.txspring.webmvc.annotation.TXResponseBody;
 import com.tian.txspring.webmvc.aop.AopBeanContainer;
 import com.tian.txspring.webmvc.config.ConfigCenter;
 import com.tian.txspring.webmvc.handler.mapping.HandlerMapping;
@@ -70,13 +72,30 @@ public class TXDispatcherServlet extends HttpServlet {
         String beanName = lowerFirstCase(method.getDeclaringClass().getSimpleName());
         // 利用反射机制调用
         try {
-            method.invoke(this.aopBeanContainer.nameBean.get(beanName), parameterValues);
+            Object result = method.invoke(this.aopBeanContainer.nameBean.get(beanName), parameterValues);
+            System.out.println(result);
+            afterProcessResult(method, result, req, resp);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         } catch (InvocationTargetException e) {
             e.printStackTrace();
         }
 
+    }
+
+    /**
+     * controller层方法调用完成后对方法的返回结果后置处理.
+     * @param method 方法对象
+     * @param result 方法返回结果
+     * @param req
+     * @param resp
+     */
+    private void afterProcessResult(Method method, Object result, HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        // 如果有@TXResponseBody注解, 则转成json,用resp回写.
+        if(method.getAnnotation(TXResponseBody.class) != null){
+            String jsonStr = JSONObject.toJSONString(result);
+            resp.getWriter().write(jsonStr);
+        }
     }
 
     /**
