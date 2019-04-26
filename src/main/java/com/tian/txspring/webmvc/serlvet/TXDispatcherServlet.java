@@ -16,6 +16,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 import static com.tian.txspring.webmvc.util.StringUtils.lowerFirstCase;
 
@@ -24,6 +25,7 @@ import static com.tian.txspring.webmvc.util.StringUtils.lowerFirstCase;
  * Created by tianxiong on 2019/3/16.
  */
 public class TXDispatcherServlet extends HttpServlet {
+    private Logger logger = Logger.getLogger(TXDispatcherServlet.class.getName());
     /**
      * 全局的配置
      */
@@ -73,7 +75,7 @@ public class TXDispatcherServlet extends HttpServlet {
         // 利用反射机制调用
         try {
             Object result = method.invoke(this.aopBeanContainer.nameBean.get(beanName), parameterValues);
-            System.out.println(result);
+            logger.info("method "+method.getName()+" return "+result);
             afterProcessResult(method, result, req, resp);
         } catch (IllegalAccessException e) {
             e.printStackTrace();
@@ -116,6 +118,8 @@ public class TXDispatcherServlet extends HttpServlet {
         aopBeanContainer.doAopInstance();
         // 增强类的注入
         aopBeanContainer.doAutowired();
+        // 调用txPostConstruct注解的方法
+        beanContainer.doPostConstruct();
         // 初始化HandlerMapping
         handlerMapping.initHandlerMapping();
 

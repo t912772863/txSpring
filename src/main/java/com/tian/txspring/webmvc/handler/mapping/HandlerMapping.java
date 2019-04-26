@@ -6,11 +6,13 @@ import com.tian.txspring.webmvc.ioc.BeanContainer;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Logger;
 
 /**
  * Created by tianxiong on 2019/3/24.
  */
 public class HandlerMapping {
+    private static final Logger logger = Logger.getLogger(HandlerMapping.class.getName());
     private BeanContainer beanContainer;
     /**
      * 方法与url映射关系
@@ -51,7 +53,7 @@ public class HandlerMapping {
                 TXRequestMapping requestMapping = method.getAnnotation(TXRequestMapping.class);
                 String url = ("/"+baseUrl+"/"+requestMapping.value()).replaceAll("[/]+","/");
                 mappings.put(url, method);
-                System.out.println("mapped:"+url+", "+method);
+                logger.info("mapped:"+url+", "+method);
             }
 
 

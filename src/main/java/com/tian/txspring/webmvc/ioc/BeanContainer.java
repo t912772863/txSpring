@@ -2,11 +2,13 @@ package com.tian.txspring.webmvc.ioc;
 
 import com.tian.txspring.webmvc.annotation.TXAutowired;
 import com.tian.txspring.webmvc.annotation.TXController;
+import com.tian.txspring.webmvc.annotation.TXPostConstruct;
 import com.tian.txspring.webmvc.annotation.TXService;
 import com.tian.txspring.webmvc.util.StringUtils;
 
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -158,5 +160,26 @@ public class BeanContainer {
 
         }
 
+    }
+
+    /**
+     * 调用@TXPostConstruct注解标记的方法
+     */
+    public void doPostConstruct(){
+        // 遍历由spring管理的对角, 遍历对象中的方法,查看是否有目标注解, 有则调用, 没有忽略
+        for(Object o: nameBean.values()){
+            Method[] methods = o.getClass().getDeclaredMethods();
+            for(Method m: methods){
+                if(m.getAnnotation(TXPostConstruct.class) != null){
+                    try {
+                        m.setAccessible(true);
+                        m.invoke(o,null);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
     }
 }

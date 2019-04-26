@@ -55,7 +55,6 @@ public class JarLoaderUtil {
     public static final void loadJarFile(File file) {
         try {
             addURL.invoke(system, new Object[] { file.toURI().toURL() });
-            //System.out.println("加载JAR包：" + file.getAbsolutePath());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -77,8 +76,4 @@ public class JarLoaderUtil {
         }
     }
 
-    public static void main(String[] args) {
-        String path = "E:\\project\\txSpring\\out\\artifacts\\txSpring_war_exploded\\WEB-INF\\classes";
-        loadJarPath(path);
-    }
 }
