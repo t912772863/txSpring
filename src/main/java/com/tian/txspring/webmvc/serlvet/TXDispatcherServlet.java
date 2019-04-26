@@ -47,7 +47,7 @@ public class TXDispatcherServlet extends HttpServlet {
         try{
             doDispatch(req, resp);
         }catch (Exception e){
-
+            e.printStackTrace();
         }
 
     }
@@ -63,30 +63,9 @@ public class TXDispatcherServlet extends HttpServlet {
             resp.getWriter().write("404 Not Found.");
         }
         Method method = handlerMapping.mappings.get(url);
-        // 获取方法的参数列表
-//        Class[] parameterTypes = method.getParameterTypes();
-        // 获取请求的参数
-//        Map<String, String[]> parameterMap = req.getParameterMap();
+
         // 保存参数值
         Object[] parameterValues = new ParseFormParam().parse(req,resp,method);
-        // 方法的参数列表
-//        for (int i = 0; i < parameterTypes.length; i++) {
-//            // 根据参数名称做某些处理
-//            Class paramTerType = parameterTypes[i];
-//            if(paramTerType == HttpServletRequest.class){
-//                // 参数类型已经明确,进行强转
-//                parameterValues[i] = req;
-//                continue;
-//            }else if(paramTerType == HttpServletResponse.class){
-//                parameterValues[i] = resp;
-//                continue;
-//            }else if(paramTerType == String.class){
-//                for(Map.Entry<String, String[]> param: parameterMap.entrySet()){
-//                    String value = Arrays.toString(param.getValue()).replaceAll("\\[|\\]", "").replaceAll(",\\s",",");
-//                    parameterValues[i] = value;
-//                }
-//            }
-//        }
 
         String beanName = lowerFirstCase(method.getDeclaringClass().getSimpleName());
         // 利用反射机制调用

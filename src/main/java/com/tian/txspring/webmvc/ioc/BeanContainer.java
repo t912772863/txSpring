@@ -28,7 +28,7 @@ public class BeanContainer {
      */
     public List<String> controllerClassNames = new ArrayList<String>();
     /**
-     * bean容器, key是类全名, 发是类的实例化对象
+     * bean容器, key是类全名, value是类的实例化对象
      */
     public Map<String, Object> typeBean = new HashMap();
     /**

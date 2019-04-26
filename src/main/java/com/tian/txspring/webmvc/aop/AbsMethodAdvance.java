@@ -1,7 +1,6 @@
 package com.tian.txspring.webmvc.aop;
 
 import com.tian.txspring.webmvc.util.StringUtils;
-import net.sf.cglib.beans.BeanMap;
 import net.sf.cglib.proxy.Enhancer;
 import net.sf.cglib.proxy.MethodInterceptor;
 import net.sf.cglib.proxy.MethodProxy;
@@ -20,15 +19,29 @@ public abstract class AbsMethodAdvance implements MethodInterceptor {
      * 被代理的方法名
      */
     private String proxyMethodName;
+    /**
+     * 是否前置拦截
+     */
+    private boolean doBefore = true;
+    /**
+     * 是否后置拦截
+     */
+    private boolean doAfter = true;
 
-    private BeanMap beanMap;
-
-    public void setValue(String property,Object value) {
-        beanMap.put(property, value);
+    public boolean isDoBefore() {
+        return doBefore;
     }
 
-    public Object getValue(String property) {
-        return beanMap.get(property);
+    public void setDoBefore(boolean doBefore) {
+        this.doBefore = doBefore;
+    }
+
+    public boolean isDoAfter() {
+        return doAfter;
+    }
+
+    public void setDoAfter(boolean doAfter) {
+        this.doAfter = doAfter;
     }
 
     public Object createProxyObject(Object target){
@@ -42,15 +55,17 @@ public abstract class AbsMethodAdvance implements MethodInterceptor {
         return enhancer.create();
     }
 
+
+
     public Object intercept(Object obj, Method method, Object[] args, MethodProxy proxy) throws Throwable {
         Object result;
         String proxyMethod = getProxyMethodName();
-        if(StringUtils.isNotBlank(proxyMethod) && proxyMethod.equals(method.getName())){
+        if(StringUtils.isNotBlank(proxyMethod) && proxyMethod.equals(method.getName()) && doBefore){
             doBefore();
         }
         // 执行拦截的方法
         result = proxy.invokeSuper(obj,args);
-        if(StringUtils.isNotBlank(proxyMethod) && proxyMethod.equals(method.getName())){
+        if(StringUtils.isNotBlank(proxyMethod) && proxyMethod.equals(method.getName()) && doAfter){
             doAfter();
         }
         return result;

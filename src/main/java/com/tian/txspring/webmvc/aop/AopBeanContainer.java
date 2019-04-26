@@ -8,7 +8,6 @@ import com.tian.txspring.webmvc.util.ReflectionUtil;
 import com.tian.txspring.webmvc.util.StringUtils;
 
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,68 +31,78 @@ public class AopBeanContainer {
      */
     public Map<String, Object> nameBean = new HashMap();
     /**
+     * 生成的aop代理加强类
+     * key为类名全路径, value为生成的加强类对象
+     */
+    public Map<String, Object> aopBean = new HashMap();
+    /**
      * 配置的切面类都有哪些
      */
     private List<String> aopClassNames = new ArrayList<String>();
 
-    private AopBeanContainer (){}
+    private AopBeanContainer() {
+    }
 
     private static AopBeanContainer instance = new AopBeanContainer();
 
-    public static AopBeanContainer getInstance(){
+    public static AopBeanContainer getInstance() {
         return instance;
     }
 
     /**
      * 切面功能初始化
      */
-    public void doAopInstance(){
-        // 先把前面生成的对象复制一份,查看有哪些方法是要增加的,生成增强类替换原对象
+    public void doAopInstance() {
+        // 先把前面生成的对象复制一份,查看有哪些方法是要增强的,生成增强类替换原对象
         syncBeans();
         // 获取到要代理的切面
-        for(String s: classNames){
+        for (String s : classNames) {
             Class<?> clazz = null;
             try {
                 clazz = Class.forName(s);
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();
             }
-            if(clazz.isAnnotationPresent(TXAspect.class)){
-                Method[] methods = clazz.getMethods();
-                for(Method method : methods){
-                    if(method.isAnnotationPresent(TXPointCut.class)){
-                        //找到切点
-                        TXPointCut pointCut = (TXPointCut)method.getAnnotations()[0];
-                        String pointCutStr = pointCut.value();
-                        String[] pointCutArr = pointCutStr.split("_");
-                        //被代理的方法名
-                        String methodName = pointCutArr[1];
-                        //根据切点 创建被代理对象
-                        Object targetObj = beanContainer.typeBean.get(pointCutArr[0]);
-                        //根据切面类创建代理者
-                        AbsMethodAdvance proxy = (AbsMethodAdvance) ReflectionUtil.newInstance(clazz);
-                        //设置代理的方法
-                        proxy.setProxyMethodName(methodName);
-
-                        Object object = proxy.createProxyObject(targetObj);
-
-
-                        if(object != null){
-                            // 生成的代理类
-                            String nameKey = StringUtils.lowerFirstCase(pointCutArr[0].substring(pointCutArr[0].lastIndexOf(".")+1));
-                            nameBean.put(nameKey, object);
-                            typeBean.put(pointCutArr[0], object);
-
-                            Class<?>[] interfaces = clazz.getInterfaces();
-                            for(Class<?> c: interfaces){
-                                typeBean.put(c.getName(), object);
-                            }
-                        }
-                    }
+            if (clazz.isAnnotationPresent(TXAspect.class)) {
+                TXPointCut pointCut = clazz.getAnnotation(TXPointCut.class);
+                if (pointCut == null || pointCut.value() == null) {
+                    return;
                 }
+                createProxyAndReplace(pointCut.value(), clazz);
             }
         }
+    }
 
+    /**
+     * 创建aop代理增强对象并替换容器中的对象
+     *
+     * @param pointCutStr 定义切面注解的值
+     * @param clazz       定义切面的类
+     */
+    private void createProxyAndReplace(String pointCutStr, Class<?> clazz) {
+        String[] pointCutArr = pointCutStr.split("_");
+        //被代理的方法名
+        String methodName = pointCutArr[1];
+        //根据切点 创建被代理对象
+        Object targetObj = beanContainer.typeBean.get(pointCutArr[0]);
+        //根据切面类创建代理者, 如果之前已经生成过代理类, 则获取到生成的, 在这前的基础上再加强
+        AbsMethodAdvance proxy = (AbsMethodAdvance) ReflectionUtil.newInstance(clazz);
+        //设置代理的方法
+        proxy.setProxyMethodName(methodName);
+
+        Object object = proxy.createProxyObject(targetObj);
+
+        if (object != null) {
+            // 生成的代理类
+            String nameKey = StringUtils.lowerFirstCase(pointCutArr[0].substring(pointCutArr[0].lastIndexOf(".") + 1));
+            nameBean.put(nameKey, object);
+            typeBean.put(pointCutArr[0], object);
+
+            Class<?>[] interfaces = clazz.getInterfaces();
+            for (Class<?> c : interfaces) {
+                typeBean.put(c.getName(), object);
+            }
+        }
     }
 
     /**
@@ -111,29 +120,27 @@ public class AopBeanContainer {
      * 第二步再注入增的的aop依赖
      */
     public void doAutowired() {
-        for(Map.Entry<String,Object> entry: nameBean.entrySet()){
+        for (Map.Entry<String, Object> entry : nameBean.entrySet()) {
             // 拿到实例对象中的所有属性
             Field[] fields = entry.getValue().getClass().getSuperclass().getDeclaredFields();
-            for(Field field : fields){
-                if(!field.isAnnotationPresent(TXAutowired.class)){
+            for (Field field : fields) {
+                if (!field.isAnnotationPresent(TXAutowired.class)) {
                     continue;
                 }
                 TXAutowired autowired = field.getAnnotation(TXAutowired.class);
                 field.setAccessible(true);
                 String beanName = autowired.value();
-                try{
-                    if(StringUtils.isNotBlank(beanName)){
+                try {
+                    if (StringUtils.isNotBlank(beanName)) {
                         // 按名字注入
                         field.set(entry.getValue(), nameBean.get(beanName));
-                    }else {
+                    } else {
                         // 按类型注入
                         field.set(entry.getValue(), typeBean.get(field.getType().getName()));
                     }
-                }catch (Exception e){
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
-
-
             }
 
         }

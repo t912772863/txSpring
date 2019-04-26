@@ -6,7 +6,7 @@ import java.lang.annotation.*;
  * Created by tianxiong on 2019/3/21.
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target(value = {ElementType.METHOD})
+@Target(value = {ElementType.TYPE, ElementType.METHOD})
 @Documented
 public @interface TXPointCut {
     /**
