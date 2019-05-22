@@ -2,6 +2,8 @@ package com.tian.txspring.webmvc.util;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by tianxiong on 2019/3/21.
@@ -58,6 +60,32 @@ public class ReflectionUtil {
             throw new RuntimeException(e);
         }
 
+    }
+
+    /**
+     * 通过反射获取到对像所有属性的值
+     *
+     * @param object
+     * @param filterNull 是否过滤空值
+     * @return K为属性名, V为值
+     */
+    public static Map<String, Object> getFiledValues(Object object, boolean filterNull) {
+        Field[] fields = object.getClass().getDeclaredFields();
+        Map<String, Object> map = new HashMap();
+        for(Field f: fields){
+            f.setAccessible(true);
+            Object value = null;
+            try {
+                value = f.get(object);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            if(filterNull && value == null){
+                continue;
+            }
+            map.put(f.getName(), value);
+        }
+        return map;
     }
 
 }
