@@ -9,6 +9,9 @@ import java.util.Map;
  */
 public class Demo001 {
     private String temp;
+    @IsParam
+    private String address;
+    @IsParam
     private String name;
 
     public String hello(){
@@ -23,7 +26,9 @@ public class Demo001 {
     public static void main(String[] args) {
         Demo001 demo001 = new Demo001();
         demo001.temp = "test";
-        Map<String, Object> map = ReflectionUtil.getFiledValues(demo001,false);
+        demo001.name= "myname";
+        demo001.address = "testAddress";
+        Map<String, Object> map = ReflectionUtil.getFiledValues(demo001,false, IsParam.class);
         System.out.println(map);
     }
 }

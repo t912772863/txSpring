@@ -1,5 +1,6 @@
 package com.tian.txspring.webmvc.util;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.HashMap;
@@ -73,6 +74,37 @@ public class ReflectionUtil {
         Field[] fields = object.getClass().getDeclaredFields();
         Map<String, Object> map = new HashMap();
         for(Field f: fields){
+            f.setAccessible(true);
+            Object value = null;
+            try {
+                value = f.get(object);
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+            if(filterNull && value == null){
+                continue;
+            }
+            map.put(f.getName(), value);
+        }
+        return map;
+    }
+
+    /**
+     * 获取还有指定注解的
+     * @param object
+     * @param filterNull
+     * @param annotationClass
+     * @param <T>
+     * @return
+     */
+    public static <T extends Annotation>  Map<String, Object> getFiledValues(Object object, boolean filterNull, Class<T> annotationClass) {
+        Field[] fields = object.getClass().getDeclaredFields();
+        Map<String, Object> map = new HashMap();
+        for(Field f: fields){
+            T t = f.getAnnotation(annotationClass);
+            if(t == null){
+                continue;
+            }
             f.setAccessible(true);
             Object value = null;
             try {
